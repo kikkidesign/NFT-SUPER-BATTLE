@@ -32,25 +32,10 @@
       width: 45%;
       max-width: 240px;
       min-width: 150px;
-      position: relative;
     }
     .char img {
       width: 100%;
       border: 4px solid #fff;
-      transition: transform 0.3s ease;
-    }
-    .select, .scoreboard {
-      margin-top: 20px;
-    }
-    button {
-      font-size: 16px;
-      margin: 5px;
-      padding: 10px 15px;
-      background-color: #333;
-      color: #fff;
-      border: 2px solid #ffcc00;
-      border-radius: 5px;
-      cursor: pointer;
     }
     .mini-btn {
       display: flex;
@@ -62,13 +47,22 @@
       margin-bottom: 5px;
       border: 2px solid #fff;
     }
+    .effect-text {
+      font-size: 1.5em;
+      color: #ff4444;
+      animation: fadeEffect 1s ease-in-out;
+    }
     .win-message {
       font-size: 3em;
       color: red;
       font-weight: bold;
       margin-top: 20px;
-      text-shadow: 2px 2px 10px #fff;
       animation: flash 0.6s infinite alternate;
+    }
+    @keyframes fadeEffect {
+      0% { opacity: 0; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.2); }
+      100% { opacity: 0; transform: scale(1); }
     }
     @keyframes flash {
       from { opacity: 1; }
@@ -80,69 +74,71 @@
   <h1>PHAGY vs CoverdPeople バトル！</h1>
   <p class="subtitle">NFT界の未来をかけたバトルが今ここにはじまる。</p>
 
-  <div class="arena">
-    <div class="char" id="playerChar"></div>
-    <div><strong>VS</strong></div>
-    <div class="char" id="cpuChar"></div>
+  <div id="teamChoice">
+    <p>使うチームを選んでね！</p>
+    <div class="team-select">
+      <button onclick="chooseTeam('phagy')">PHAGY 🦎</button>
+      <button onclick="chooseTeam('coverd')">CoverdPeople 🍖</button>
+    </div>
   </div>
 
-  <div id="effectArea"></div>
+  <div id="gameArea" style="display:none">
+    <div class="arena">
+      <div class="char" id="playerChar"></div>
+      <div><strong>VS</strong></div>
+      <div class="char" id="cpuChar"></div>
+    </div>
 
-  <div class="select" id="selectArea">
-    <p>キャラを選んでバトル！</p>
-    <div id="charButtons"></div>
-  </div>
+    <div id="effectArea"></div>
 
-  <div class="scoreboard">
-    <p id="result"></p>
-    <p>あなた：<span id="playerScore">0</span> / CPU：<span id="cpuScore">0</span></p>
-    <div id="winMessage"></div>
+    <div class="select" id="selectArea">
+      <p>キャラを選んでバトル！</p>
+      <div id="charButtons"></div>
+    </div>
+
+    <div class="scoreboard">
+      <p id="result"></p>
+      <p>あなた：<span id="playerScore">0</span> / CPU：<span id="cpuScore">0</span></p>
+      <div id="winMessage"></div>
+    </div>
   </div>
 
   <script>
+    const teams = {
+      phagy: {
+        majime: { src: "phagy_majime.png", label: "PHAGY まじめ" },
+        fuzake: { src: "phagy_fuzake.png", label: "PHAGY ふざけ" },
+        fusei: { src: "phagy_fusei.png", label: "PHAGY ふせい" },
+      },
+      coverd: {
+        majime: { src: "coverd_majime.png", label: "COVERD まじめ" },
+        fuzake: { src: "coverd_fuzake.png", label: "COVERD ふざけ" },
+        fusei: { src: "coverd_fusei.png", label: "COVERD ふせい" },
+      }
+    };
+
     const beats = {
       majime: "fusei",
       fusei: "fuzake",
       fuzake: "majime"
     };
 
-    const teams = {
-      phagy: {
-        majime: { src: "phagy_majime.png", label: "まじめ" },
-        fuzake: { src: "phagy_fuzake.png", label: "ふざけ" },
-        fusei: { src: "phagy_fusei.png", label: "ふせい" },
-      },
-      coverd: {
-        majime: { src: "coverd_majime.png", label: "まじめ" },
-        fuzake: { src: "coverd_fuzake.png", label: "ふざけ" },
-        fusei: { src: "coverd_fusei.png", label: "ふせい" },
-      }
-    };
-
-    let selectedTeam = "coverd"; // ← 必要に応じて切り替え
-    let cpuTeam = "phagy";       // ← 自動で選ばれる想定
     let playerScore = 0;
     let cpuScore = 0;
-    let currentRound = 1;
-    const maxRounds = 3;
+    let selectedTeam = null;
+    let cpuTeam = null;
 
-    const selectArea = document.getElementById("selectArea");
-    const charButtons = document.getElementById("charButtons");
-    const result = document.getElementById("result");
-    const winMessage = document.getElementById("winMessage");
-
-    function renderCharacter(id, data) {
-      const container = document.getElementById(id);
-      container.innerHTML = `<img src="${data.src}" alt="${data.label}" /><p>${data.label}</p>`;
+    function chooseTeam(team) {
+      selectedTeam = team;
+      cpuTeam = team === "phagy" ? "coverd" : "phagy";
+      document.getElementById("teamChoice").style.display = "none";
+      document.getElementById("gameArea").style.display = "block";
+      renderCharButtons();
     }
 
-    function randomChoice(teamKey) {
-      const keys = Object.keys(teams[teamKey]);
-      return keys[Math.floor(Math.random() * keys.length)];
-    }
-
-    function showCharacterSelect() {
-      charButtons.innerHTML = "";
+    function renderCharButtons() {
+      const container = document.getElementById("charButtons");
+      container.innerHTML = "";
       Object.keys(teams[selectedTeam]).forEach(key => {
         const div = document.createElement("div");
         div.className = "mini-btn";
@@ -150,7 +146,7 @@
           <img src="${teams[selectedTeam][key].src}" />
           <button onclick="battle('${key}')">${teams[selectedTeam][key].label}</button>
         `;
-        charButtons.appendChild(div);
+        container.appendChild(div);
       });
     }
 
@@ -161,7 +157,6 @@
 
       renderCharacter("playerChar", playerData);
       renderCharacter("cpuChar", cpuData);
-      selectArea.style.display = "none";
 
       let message = "";
       let winText = "";
@@ -169,34 +164,50 @@
       if (playerChoice === cpuChoice) {
         message = "あいこだ！";
       } else if (beats[playerChoice] === cpuChoice) {
-        message = `${playerData.label}のこうげき！${cpuData.label}がしんだ！`;
-        winText = `ROUND ${currentRound} WIN !!!`;
+        message = `${playerData.label}のこうげき！ ${cpuData.label}がしんだ！`;
+        winText = "WIN !!!";
         playerScore++;
       } else {
-        message = `${cpuData.label}のこうげき！${playerData.label}がしんだ！`;
-        winText = `ROUND ${currentRound} LOSE !!!`;
+        message = `${cpuData.label}のこうげき！ ${playerData.label}がしんだ！`;
+        winText = "LOSE !!!";
         cpuScore++;
       }
 
-      result.textContent = message;
-
-      setTimeout(() => {
-        winMessage.innerHTML = `<p class="win-message">${winText}</p>`;
-        currentRound++;
-        if (currentRound <= maxRounds) {
-          setTimeout(() => {
-            selectArea.style.display = "block";
-            showCharacterSelect();
-          }, 2000);
-        }
-      }, 1500);
-
+      showEffect(message);
+      document.getElementById("winMessage").innerHTML = `<p class="win-message">${winText}</p>`;
       document.getElementById("playerScore").textContent = playerScore;
       document.getElementById("cpuScore").textContent = cpuScore;
+
+      setTimeout(() => {
+        document.getElementById("winMessage").innerHTML = "";
+        renderCharButtons();
+      }, 2000);
     }
 
-    // 初期化
-    showCharacterSelect();
+    function showEffect(text) {
+      const effect = document.createElement("p");
+      effect.className = "effect-text";
+      effect.textContent = text;
+      const area = document.getElementById("effectArea");
+      area.innerHTML = "";
+      area.appendChild(effect);
+      setTimeout(() => {
+        area.innerHTML = "";
+      }, 1500);
+    }
+
+    function renderCharacter(id, data) {
+      const container = document.getElementById(id);
+      container.innerHTML = `
+        <img src="${data.src}" alt="${data.label}" />
+        <p>${data.label}</p>
+      `;
+    }
+
+    function randomChoice(teamKey) {
+      const keys = Object.keys(teams[teamKey]);
+      return keys[Math.floor(Math.random() * keys.length)];
+    }
   </script>
 </body>
 </html>
