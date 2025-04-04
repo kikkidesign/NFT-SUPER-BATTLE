@@ -12,51 +12,36 @@
       text-align: center;
       padding: 20px;
     }
-
     h1 {
       color: #ffcc00;
       font-size: 1.8em;
     }
-
     .subtitle {
-      margin-top: -10px;
       font-size: 1em;
       color: #ccc;
+      margin-top: -10px;
     }
-
-    .arena, .team-select {
+    .arena, .team-select, #charButtons {
       display: flex;
       justify-content: center;
-      align-items: center;
       flex-wrap: wrap;
       gap: 20px;
       margin-top: 20px;
     }
-
     .char {
       width: 45%;
       max-width: 240px;
       min-width: 150px;
+      position: relative;
     }
-
     .char img {
       width: 100%;
-      height: auto;
       border: 4px solid #fff;
+      transition: transform 0.3s ease;
     }
-
     .select, .scoreboard {
       margin-top: 20px;
     }
-
-    #charButtons {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
     button {
       font-size: 16px;
       margin: 5px;
@@ -67,62 +52,90 @@
       border-radius: 5px;
       cursor: pointer;
     }
-
-    button:hover {
-      background-color: #555;
-    }
-
     .team-card {
       text-align: center;
     }
-
     .emoji {
       font-size: 1.5em;
     }
-
     .mini-chars {
       display: flex;
       justify-content: center;
       gap: 5px;
       margin-top: 5px;
     }
-
     .mini-chars img {
       width: 60px;
-      height: auto;
       border: 2px solid #fff;
     }
-
-    #confirmationArea {
+    .mini-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .mini-btn img {
+      width: 50px;
+      margin-bottom: 5px;
+      border: 2px solid #fff;
+    }
+    .effect-text, .round-title, .round-fight {
+      font-size: 1.6em;
+      color: #ff4444;
+      animation: fadeEffect 1s ease-in-out;
+      font-weight: bold;
+    }
+    .round-title {
+      color: red;
+      font-size: 2em;
+      margin-top: 10px;
+    }
+    .round-fight {
+      font-size: 2.4em;
+      color: orange;
+    }
+    @keyframes fadeEffect {
+      0% { opacity: 0; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.2); }
+      100% { opacity: 0; transform: scale(1); }
+    }
+    .shake {
+      animation: shake 0.4s ease-in-out;
+    }
+    @keyframes shake {
+      0% { transform: translateX(0px); }
+      25% { transform: translateX(-10px); }
+      50% { transform: translateX(10px); }
+      75% { transform: translateX(-10px); }
+      100% { transform: translateX(0px); }
+    }
+    .fade-out {
+      animation: fadeOut 0.8s forwards;
+    }
+    @keyframes fadeOut {
+      to { opacity: 0; transform: scale(0.5); }
+    }
+    .win-message {
+      font-size: 2.4em;
+      color: #00ffcc;
+      margin-top: 20px;
+      text-shadow: 2px 2px 10px #fff;
+    }
+    .result-screen {
+      font-size: 2em;
       margin-top: 30px;
     }
-
-    #startBattleBtn {
-      font-size: 20px;
-      padding: 15px 30px;
-      border: 2px solid #f00;
-      background: linear-gradient(45deg, #ff0000, #ff6600);
-      color: #fff;
-      animation: flicker 0.3s infinite alternate;
+    .hidden {
+      display: none !important;
     }
-
-    @keyframes flicker {
-      0% { box-shadow: 0 0 5px #ff0; }
-      100% { box-shadow: 0 0 20px #f00; }
-    }
-
-    @media (max-width: 500px) {
+    @media (max-width: 600px) {
       .char {
         width: 100%;
-      }
-      button {
-        width: 100%;
-        font-size: 18px;
       }
     }
   </style>
 </head>
-<body>
+
+  <body>
   <h1>PHAGY vs CoverdPeople バトル！</h1>
   <p class="subtitle">NFT界の未来をかけたバトルが今ここにはじまる。</p>
 
@@ -133,18 +146,18 @@
         <button onclick="confirmTeam('phagy')">PHAGY</button>
         <div class="emoji">🦎🦎🦎</div>
         <div class="mini-chars">
-          <img src="phagy_majime.png" alt="まじめ" />
-          <img src="phagy_fuzake.png" alt="ふざけ" />
-          <img src="phagy_fusei.png" alt="ふせい" />
+          <img src="phagy_majime.png" />
+          <img src="phagy_fuzake.png" />
+          <img src="phagy_fusei.png" />
         </div>
       </div>
       <div class="team-card">
         <button onclick="confirmTeam('coverd')">CoverdPeople</button>
         <div class="emoji">🍖🍖🍖</div>
         <div class="mini-chars">
-          <img src="coverd_majime.png" alt="まじめ" />
-          <img src="coverd_fuzake.png" alt="ふざけ" />
-          <img src="coverd_fusei.png" alt="ふせい" />
+          <img src="coverd_majime.png" />
+          <img src="coverd_fuzake.png" />
+          <img src="coverd_fusei.png" />
         </div>
       </div>
     </div>
@@ -152,13 +165,16 @@
   </div>
 
   <div id="gameArea" style="display:none">
+    <p class="round-title" id="roundDisplay"></p>
     <div class="arena">
       <div class="char" id="playerChar"></div>
       <div><strong>VS</strong></div>
       <div class="char" id="cpuChar"></div>
     </div>
 
-    <div class="select">
+    <div id="effectArea"></div>
+
+    <div class="select" id="selectArea">
       <p>キャラを選んでバトル！</p>
       <div id="charButtons"></div>
     </div>
@@ -166,92 +182,188 @@
     <div class="scoreboard">
       <p id="result"></p>
       <p>あなた：<span id="playerScore">0</span> / CPU：<span id="cpuScore">0</span></p>
+      <div id="winMessage"></div>
     </div>
+
+    <div class="result-screen" id="finalResult" style="display: none;"></div>
+    <div id="restartArea"></div>
   </div>
 
-  <script>
-    const teams = {
-      phagy: {
-        majime: { src: "phagy_majime.png", label: "まじめ" },
-        fuzake: { src: "phagy_fuzake.png", label: "ふざけ" },
-        fusei: { src: "phagy_fusei.png", label: "ふせい" },
-      },
-      coverd: {
-        majime: { src: "coverd_majime.png", label: "まじめ" },
-        fuzake: { src: "coverd_fuzake.png", label: "ふざけ" },
-        fusei: { src: "coverd_fusei.png", label: "ふせい" },
-      }
-    };
+    <script>
+  const teams = {
+    phagy: {
+      majime: { src: "phagy_majime.png", label: "まじめ" },
+      fuzake: { src: "phagy_fuzake.png", label: "ふざけ" },
+      fusei: { src: "phagy_fusei.png", label: "ふせい" },
+    },
+    coverd: {
+      majime: { src: "coverd_majime.png", label: "まじめ" },
+      fuzake: { src: "coverd_fuzake.png", label: "ふざけ" },
+      fusei: { src: "coverd_fusei.png", label: "ふせい" },
+    }
+  };
 
-    const beats = {
-      majime: "fusei",
-      fusei: "fuzake",
-      fuzake: "majime"
-    };
+  const beats = {
+    majime: "fusei",
+    fusei: "fuzake",
+    fuzake: "majime"
+  };
 
-    let playerScore = 0;
-    let cpuScore = 0;
-    let selectedTeam = null;
-    let cpuTeam = null;
+  let playerScore = 0;
+  let cpuScore = 0;
+  let selectedTeam = null;
+  let cpuTeam = null;
+  let currentRound = 1;
+  let maxRounds = 3;
+  let selectedChar = null;
 
-    function confirmTeam(team) {
-      selectedTeam = team;
-      cpuTeam = team === "phagy" ? "coverd" : "phagy";
-      const name = team === "phagy" ? "PHAGY" : "CoverdPeople";
-      document.getElementById("confirmationArea").innerHTML = `
-        <p><strong>${name}チームでOK？</strong></p>
-        <button id="startBattleBtn" onclick="startBattle()">🔥バトルスタート🔥</button>
+  function confirmTeam(team) {
+    selectedTeam = team;
+    cpuTeam = team === "phagy" ? "coverd" : "phagy";
+    const name = team === "phagy" ? "PHAGY" : "CoverdPeople";
+    document.getElementById("confirmationArea").innerHTML = `
+      <p><strong>${name}チームでOK？</strong></p>
+      <button onclick="startRound()">🔥バトルスタート🔥</button>
+    `;
+  }
+
+  function startRound() {
+    document.getElementById("teamChoice").style.display = "none";
+    document.getElementById("gameArea").style.display = "block";
+    renderRound();
+    showEffect(`ROUND ${currentRound} FIGHT!`, "round-fight");
+    setTimeout(() => {
+      showCharacterSelect();
+    }, 1200);
+  }
+
+  function renderRound() {
+    document.getElementById("roundDisplay").textContent = `ROUND ${currentRound}`;
+    document.getElementById("result").textContent = "";
+    document.getElementById("winMessage").textContent = "";
+    document.getElementById("effectArea").innerHTML = "";
+    document.getElementById("playerChar").innerHTML = "";
+    document.getElementById("cpuChar").innerHTML = "";
+  }
+
+  function showCharacterSelect() {
+    const container = document.getElementById("charButtons");
+    container.innerHTML = "";
+    Object.keys(teams[selectedTeam]).forEach(key => {
+      const div = document.createElement("div");
+      div.className = "mini-btn";
+      div.innerHTML = `
+        <img src="${teams[selectedTeam][key].src}" />
+        <button onclick="confirmChar('${key}')">${teams[selectedTeam][key].label}</button>
       `;
+      container.appendChild(div);
+    });
+    document.getElementById("selectArea").classList.remove("hidden");
+  }
+
+  function confirmChar(charKey) {
+    selectedChar = charKey;
+    const label = teams[selectedTeam][charKey].label;
+    document.getElementById("selectArea").innerHTML = `
+      <p>${label}でいいですか？</p>
+      <button onclick="battle()">NEXT ROUND START !!</button>
+    `;
+  }
+
+  function battle() {
+    const cpuChoice = randomChoice(cpuTeam);
+    const playerChoice = selectedChar;
+    const playerData = teams[selectedTeam][playerChoice];
+    const cpuData = teams[cpuTeam][cpuChoice];
+
+    renderCharacter("playerChar", playerData);
+    renderCharacter("cpuChar", cpuData);
+    document.getElementById("selectArea").classList.add("hidden");
+
+    const playerName = selectedTeam.toUpperCase();
+    const cpuName = cpuTeam.toUpperCase();
+
+    let message = "";
+    let winText = "";
+
+    if (playerChoice === cpuChoice) {
+      message = "あいこだ！";
+    } else if (beats[playerChoice] === cpuChoice) {
+      message = `${playerName} ${playerData.label}のこうげき！ ${cpuName} ${cpuData.label}がしんだ！`;
+      winText = `ROUND ${currentRound} WIN !!!`;
+      playerScore++;
+      animateDefeat("cpuChar");
+    } else {
+      message = `${cpuName} ${cpuData.label}のこうげき！ ${playerName} ${playerData.label}がしんだ！`;
+      winText = `ROUND ${currentRound} LOSE !!!`;
+      cpuScore++;
+      animateDefeat("playerChar");
     }
 
-    function startBattle() {
-      document.getElementById("teamChoice").style.display = "none";
-      document.getElementById("gameArea").style.display = "block";
-      renderCharButtons();
-    }
+    showEffect(message, "effect-text");
 
-    function renderCharButtons() {
-      const container = document.getElementById("charButtons");
-      container.innerHTML = "";
-      Object.keys(teams[selectedTeam]).forEach(key => {
-        const btn = document.createElement("button");
-        btn.textContent = teams[selectedTeam][key].label;
-        btn.onclick = () => battle(key);
-        container.appendChild(btn);
-      });
-    }
+    setTimeout(() => {
+      document.getElementById("winMessage").textContent = winText;
+      nextRound();
+    }, 1500);
+  }
 
-    function battle(playerChoice) {
-      const cpuChoice = randomChoice(cpuTeam);
-      renderCharacter("playerChar", teams[selectedTeam][playerChoice]);
-      renderCharacter("cpuChar", teams[cpuTeam][cpuChoice]);
-
-      const resultText = document.getElementById("result");
-      if (playerChoice === cpuChoice) {
-        resultText.textContent = "あいこ！";
-      } else if (beats[playerChoice] === cpuChoice) {
-        resultText.textContent = "あなたの勝ち！";
-        playerScore++;
-      } else {
-        resultText.textContent = "CPUの勝ち！";
-        cpuScore++;
-      }
-      document.getElementById("playerScore").textContent = playerScore;
-      document.getElementById("cpuScore").textContent = cpuScore;
+  function nextRound() {
+    currentRound++;
+    if (currentRound > maxRounds) {
+      showResult();
+    } else {
+      setTimeout(() => {
+        document.getElementById("selectArea").innerHTML = `
+          <p>NEXT BATTLE SELECT NOW!</p>
+        `;
+        showCharacterSelect();
+      }, 2000);
     }
+  }
 
-    function renderCharacter(targetId, data) {
-      const container = document.getElementById(targetId);
-      container.innerHTML = `
-        <img src="${data.src}" alt="${data.label}" />
-        <p>${data.label}</p>
-      `;
+  function showResult() {
+    const final = document.getElementById("finalResult");
+    const restart = document.getElementById("restartArea");
+    final.style.display = "block";
+    if (playerScore > cpuScore) {
+      final.innerHTML = `<p>RESULT</p><p>今回はあなたが大勝利！</p>`;
+    } else {
+      final.innerHTML = `<p>RESULT</p><p>今回はあなたの歴史的敗北！！</p>`;
     }
+    restart.innerHTML = `<button onclick="location.reload()">トップのチーム選択画面に戻る</button>`;
+  }
 
-    function randomChoice(teamKey) {
-      const keys = Object.keys(teams[teamKey]);
-      return keys[Math.floor(Math.random() * keys.length)];
-    }
-  </script>
+  function renderCharacter(id, data) {
+    const container = document.getElementById(id);
+    container.innerHTML = `<img src="${data.src}" alt="${data.label}" /><p>${data.label}</p>`;
+  }
+
+  function animateDefeat(targetId) {
+    const target = document.getElementById(targetId).querySelector("img");
+    target.classList.add("shake");
+    setTimeout(() => {
+      target.classList.remove("shake");
+      target.classList.add("fade-out");
+    }, 500);
+  }
+
+  function showEffect(text, className) {
+    const effect = document.createElement("p");
+    effect.className = className;
+    effect.textContent = text;
+    const area = document.getElementById("effectArea");
+    area.innerHTML = "";
+    area.appendChild(effect);
+    setTimeout(() => {
+      area.removeChild(effect);
+    }, 1500);
+  }
+
+  function randomChoice(teamKey) {
+    const keys = Object.keys(teams[teamKey]);
+    return keys[Math.floor(Math.random() * keys.length)];
+  }
+</script>
 </body>
 </html>
