@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>PHAGY vs CoverdPeople バトル</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #fff;
+      font-family: monospace;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #ffcc00;
+    }
+    .arena, .team-select {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .char {
+      width: 200px;
+    }
+    .char img {
+      width: 100%;
+      border: 4px solid #fff;
+    }
+    .select, .scoreboard {
+      margin-top: 20px;
+    }
+    button {
+      font-size: 16px;
+      margin: 5px;
+      padding: 10px;
+      background-color: #333;
+      color: #fff;
+      border: 2px solid #ffcc00;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>PHAGY vs CoverdPeople バトル！</h1>
+
+  <div id="teamChoice">
+    <p>使うチームを選んでね！</p>
+    <div class="team-select">
+      <button onclick="chooseTeam('phagy')">PHAGY</button>
+      <button onclick="chooseTeam('coverd')">CoverdPeople</button>
+    </div>
+  </div>
+
+  <div id="gameArea" style="display:none">
+    <div class="arena">
+      <div class="char" id="playerChar"></div>
+      <div><strong>VS</strong></div>
+      <div class="char" id="cpuChar"></div>
+    </div>
+
+    <div class="select">
+      <p>キャラを選んでバトル！</p>
+      <div id="charButtons"></div>
+    </div>
+
+    <div class="scoreboard">
+      <p id="result"></p>
+      <p>あなた：<span id="playerScore">0</span> / CPU：<span id="cpuScore">0</span></p>
+    </div>
+  </div>
+
+  <script>
+    const teams = {
+      phagy: {
+        majime: { src: "phagy_majime.png", label: "まじめ" },
+        fuzake: { src: "phagy_fuzake.png", label: "ふざけ" },
+        fusei: { src: "phagy_fusei.png", label: "ふせい" },
+      },
+      coverd: {
+        majime: { src: "coverd_majime.png", label: "まじめ" },
+        fuzake: { src: "coverd_fuzake.png", label: "ふざけ" },
+        fusei: { src: "coverd_fusei.png", label: "ふせい" },
+      }
+    };
+
+    const beats = {
+      majime: 'fusei',
+      fusei: 'fuzake',
+      fuzake: 'majime'
+    };
+
+    let playerScore = 0;
+    let cpuScore = 0;
+    let selectedTeam = null;
+    let cpuTeam = null;
+
+    function chooseTeam(team) {
+      selectedTeam = team;
+      cpuTeam = team === 'phagy' ? 'coverd' : 'phagy';
+      document.getElementById('teamChoice').style.display = 'none';
+      document.getElementById('gameArea').style.display = 'block';
+      renderCharButtons();
+    }
+
+    function renderCharButtons() {
+      const container = document.getElementById('charButtons');
+      container.innerHTML = '';
+      Object.keys(teams[selectedTeam]).forEach(key => {
+        const btn = document.createElement('button');
+        btn.textContent = teams[selectedTeam][key].label;
+        btn.onclick = () => battle(key);
+        container.appendChild(btn);
+      });
+    }
+
+    function battle(playerChoice) {
+      const cpuChoice = randomChoice(cpuTeam);
+      renderCharacter('playerChar', teams[selectedTeam][playerChoice]);
+      renderCharacter('cpuChar', teams[cpuTeam][cpuChoice]);
+
+      const resultText = document.getElementById('result');
+      if (playerChoice === cpuChoice) {
+        resultText.textContent = 'あいこ！';
+      } else if (beats[playerChoice] === cpuChoice) {
+        resultText.textContent = 'あなたの勝ち！';
+        playerScore++;
+      } else {
+        resultText.textContent = 'CPUの勝ち！';
+        cpuScore++;
+      }
+      document.getElementById('playerScore').textContent = playerScore;
+      document.getElementById('cpuScore').textContent = cpuScore;
+    }
+
+    function renderCharacter(targetId, data) {
+      const container = document.getElementById(targetId);
+      container.innerHTML = `
+        <img src="${data.src}" alt="${data.label}" />
+        <p>${data.label}</p>
+      `;
+    }
+
+    function randomChoice(teamKey) {
+      const keys = Object.keys(teams[teamKey]);
+      return keys[Math.floor(Math.random() * keys.length)];
+    }
+  </script>
+</body>
+</html>
