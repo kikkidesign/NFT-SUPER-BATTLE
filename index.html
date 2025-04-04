@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PHAGY vs CoverdPeople バトル</title>
   <style>
     body {
@@ -11,46 +12,143 @@
       text-align: center;
       padding: 20px;
     }
+
     h1 {
       color: #ffcc00;
+      font-size: 1.8em;
     }
+
+    .subtitle {
+      margin-top: -10px;
+      font-size: 1em;
+      color: #ccc;
+    }
+
     .arena, .team-select {
       display: flex;
       justify-content: center;
-      gap: 40px;
-      margin-top: 20px;
+      align-items: center;
       flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 20px;
     }
+
     .char {
-      width: 200px;
+      width: 45%;
+      max-width: 240px;
+      min-width: 150px;
     }
+
     .char img {
       width: 100%;
+      height: auto;
       border: 4px solid #fff;
     }
+
     .select, .scoreboard {
       margin-top: 20px;
     }
+
+    #charButtons {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
     button {
       font-size: 16px;
       margin: 5px;
-      padding: 10px;
+      padding: 10px 15px;
       background-color: #333;
       color: #fff;
       border: 2px solid #ffcc00;
+      border-radius: 5px;
       cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #555;
+    }
+
+    .team-card {
+      text-align: center;
+    }
+
+    .emoji {
+      font-size: 1.5em;
+    }
+
+    .mini-chars {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 5px;
+    }
+
+    .mini-chars img {
+      width: 60px;
+      height: auto;
+      border: 2px solid #fff;
+    }
+
+    #confirmationArea {
+      margin-top: 30px;
+    }
+
+    #startBattleBtn {
+      font-size: 20px;
+      padding: 15px 30px;
+      border: 2px solid #f00;
+      background: linear-gradient(45deg, #ff0000, #ff6600);
+      color: #fff;
+      animation: flicker 0.3s infinite alternate;
+    }
+
+    @keyframes flicker {
+      0% { box-shadow: 0 0 5px #ff0; }
+      100% { box-shadow: 0 0 20px #f00; }
+    }
+
+    @media (max-width: 500px) {
+      .char {
+        width: 100%;
+      }
+      button {
+        width: 100%;
+        font-size: 18px;
+      }
     }
   </style>
 </head>
 <body>
   <h1>PHAGY vs CoverdPeople バトル！</h1>
+  <p class="subtitle">NFT界の未来をかけたバトルが今ここにはじまる。</p>
 
   <div id="teamChoice">
     <p>使うチームを選んでね！</p>
     <div class="team-select">
-      <button onclick="chooseTeam('phagy')">PHAGY</button>
-      <button onclick="chooseTeam('coverd')">CoverdPeople</button>
+      <div class="team-card">
+        <button onclick="confirmTeam('phagy')">PHAGY</button>
+        <div class="emoji">🦎🦎🦎</div>
+        <div class="mini-chars">
+          <img src="phagy_majime.png" alt="まじめ" />
+          <img src="phagy_fuzake.png" alt="ふざけ" />
+          <img src="phagy_fusei.png" alt="ふせい" />
+        </div>
+      </div>
+      <div class="team-card">
+        <button onclick="confirmTeam('coverd')">CoverdPeople</button>
+        <div class="emoji">🍖🍖🍖</div>
+        <div class="mini-chars">
+          <img src="coverd_majime.png" alt="まじめ" />
+          <img src="coverd_fuzake.png" alt="ふざけ" />
+          <img src="coverd_fusei.png" alt="ふせい" />
+        </div>
+      </div>
     </div>
+    <div id="confirmationArea"></div>
   </div>
 
   <div id="gameArea" style="display:none">
@@ -86,9 +184,9 @@
     };
 
     const beats = {
-      majime: 'fusei',
-      fusei: 'fuzake',
-      fuzake: 'majime'
+      majime: "fusei",
+      fusei: "fuzake",
+      fuzake: "majime"
     };
 
     let playerScore = 0;
@@ -96,19 +194,27 @@
     let selectedTeam = null;
     let cpuTeam = null;
 
-    function chooseTeam(team) {
+    function confirmTeam(team) {
       selectedTeam = team;
-      cpuTeam = team === 'phagy' ? 'coverd' : 'phagy';
-      document.getElementById('teamChoice').style.display = 'none';
-      document.getElementById('gameArea').style.display = 'block';
+      cpuTeam = team === "phagy" ? "coverd" : "phagy";
+      const name = team === "phagy" ? "PHAGY" : "CoverdPeople";
+      document.getElementById("confirmationArea").innerHTML = `
+        <p><strong>${name}チームでOK？</strong></p>
+        <button id="startBattleBtn" onclick="startBattle()">🔥バトルスタート🔥</button>
+      `;
+    }
+
+    function startBattle() {
+      document.getElementById("teamChoice").style.display = "none";
+      document.getElementById("gameArea").style.display = "block";
       renderCharButtons();
     }
 
     function renderCharButtons() {
-      const container = document.getElementById('charButtons');
-      container.innerHTML = '';
+      const container = document.getElementById("charButtons");
+      container.innerHTML = "";
       Object.keys(teams[selectedTeam]).forEach(key => {
-        const btn = document.createElement('button');
+        const btn = document.createElement("button");
         btn.textContent = teams[selectedTeam][key].label;
         btn.onclick = () => battle(key);
         container.appendChild(btn);
@@ -117,21 +223,21 @@
 
     function battle(playerChoice) {
       const cpuChoice = randomChoice(cpuTeam);
-      renderCharacter('playerChar', teams[selectedTeam][playerChoice]);
-      renderCharacter('cpuChar', teams[cpuTeam][cpuChoice]);
+      renderCharacter("playerChar", teams[selectedTeam][playerChoice]);
+      renderCharacter("cpuChar", teams[cpuTeam][cpuChoice]);
 
-      const resultText = document.getElementById('result');
+      const resultText = document.getElementById("result");
       if (playerChoice === cpuChoice) {
-        resultText.textContent = 'あいこ！';
+        resultText.textContent = "あいこ！";
       } else if (beats[playerChoice] === cpuChoice) {
-        resultText.textContent = 'あなたの勝ち！';
+        resultText.textContent = "あなたの勝ち！";
         playerScore++;
       } else {
-        resultText.textContent = 'CPUの勝ち！';
+        resultText.textContent = "CPUの勝ち！";
         cpuScore++;
       }
-      document.getElementById('playerScore').textContent = playerScore;
-      document.getElementById('cpuScore').textContent = cpuScore;
+      document.getElementById("playerScore").textContent = playerScore;
+      document.getElementById("cpuScore").textContent = cpuScore;
     }
 
     function renderCharacter(targetId, data) {
